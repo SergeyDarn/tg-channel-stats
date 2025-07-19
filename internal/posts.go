@@ -38,7 +38,7 @@ type Reaction struct {
 	Emoji string
 }
 
-func (p *Post) GetReactionsCount() int {
+func (p *Post) ReactionCount() int {
 	var count int
 
 	for _, reaction := range p.Reactions {
@@ -49,16 +49,38 @@ func (p *Post) GetReactionsCount() int {
 }
 
 func (p *Post) ShortText() string {
-	text := p.Text
-	if len(p.Text) > shortenedMessageLength {
-		text = text[0:shortenedMessageLength]
+	if len(p.Text) <= shortenedMessageLength {
+		return p.Text
 	}
-	return text
+
+	return p.Text[0:shortenedMessageLength]
+}
+
+func (p *Post) WordCount() int {
+	return CountWords(p.Text)
+}
+
+func (p *Post) Print() {
+	fmt.Println()
+	fmt.Println(separator)
+	fmt.Printf(PrepareColorOutput("Id: %d", colorPink), p.Id)
+	fmt.Println()
+	fmt.Println(p.ShortText())
+	fmt.Printf(
+		PrepareColorOutput("Reactions: %d %v", colorOrange),
+		p.ReactionCount(),
+		p.Reactions,
+	)
+	fmt.Println()
+	fmt.Printf(PrepareColorOutput("Word count: %d", colorLightBlue), p.WordCount())
+	fmt.Println()
+	fmt.Println(separator)
+	fmt.Println()
 }
 
 func SortByPopularity(posts []Post) []Post {
 	sort.SliceStable(posts, func(i, j int) bool {
-		return posts[i].GetReactionsCount() > posts[j].GetReactionsCount()
+		return posts[i].ReactionCount() > posts[j].ReactionCount()
 	})
 
 	return posts
@@ -66,7 +88,23 @@ func SortByPopularity(posts []Post) []Post {
 
 func SortByUnpopularity(posts []Post) []Post {
 	sort.SliceStable(posts, func(i, j int) bool {
-		return posts[i].GetReactionsCount() < posts[j].GetReactionsCount()
+		return posts[i].ReactionCount() < posts[j].ReactionCount()
+	})
+
+	return posts
+}
+
+func SortLongest(posts []Post) []Post {
+	sort.SliceStable(posts, func(i, j int) bool {
+		return posts[i].WordCount() > posts[j].WordCount()
+	})
+
+	return posts
+}
+
+func SortShortest(posts []Post) []Post {
+	sort.SliceStable(posts, func(i, j int) bool {
+		return posts[i].WordCount() < posts[j].WordCount()
 	})
 
 	return posts
@@ -77,7 +115,7 @@ func GetAverageWordCount(posts []Post, ignoreBelowCount int) int {
 	var postsCount int
 
 	for _, post := range posts {
-		postWordCount := CountWords(post.Text)
+		postWordCount := post.WordCount()
 		if postWordCount < ignoreBelowCount {
 			continue
 		}
@@ -89,40 +127,10 @@ func GetAverageWordCount(posts []Post, ignoreBelowCount int) int {
 	return int(wordCount / postsCount)
 }
 
-func SortLongest(posts []Post) []Post {
-	sort.SliceStable(posts, func(i, j int) bool {
-		return CountWords(posts[i].Text) > CountWords(posts[j].Text)
-	})
-
-	return posts
-}
-
-func SortShortest(posts []Post) []Post {
-	sort.SliceStable(posts, func(i, j int) bool {
-		return CountWords(posts[i].Text) < CountWords(posts[j].Text)
-	})
-
-	return posts
-}
-
 func PrintPosts(posts []Post) {
 	slices.Reverse(posts)
 
 	for _, post := range posts {
-		fmt.Println()
-		fmt.Println(separator)
-		fmt.Printf(PrepareColorOutput("Id: %d", colorPink), post.Id)
-		fmt.Println()
-		fmt.Println(post.ShortText())
-		fmt.Printf(
-			PrepareColorOutput("Reactions: %d %v", colorOrange),
-			post.GetReactionsCount(),
-			post.Reactions,
-		)
-		fmt.Println()
-		fmt.Printf(PrepareColorOutput("Word count: %d", colorLightBlue), CountWords(post.Text))
-		fmt.Println()
-		fmt.Println(separator)
-		fmt.Println()
+		post.Print()
 	}
 }
