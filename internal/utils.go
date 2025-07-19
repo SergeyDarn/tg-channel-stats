@@ -26,10 +26,10 @@ func PrepareColorOutput(output string, color lipgloss.Color) string {
 
 func CountWords(s string) int {
 	s = strings.TrimSpace(s)
-	lines := strings.Split(s, "\n")
+	lines := strings.SplitSeq(s, "\n")
 	counter := 0
 
-	for _, line := range lines {
+	for line := range lines {
 		words := strings.SplitSeq(line, " ")
 
 		for word := range words {
