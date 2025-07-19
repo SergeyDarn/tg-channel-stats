@@ -10,15 +10,15 @@ func main() {
 	channel := internal.ReadChannelJson()
 	posts := channel.GetPosts()
 
-	postsToShow := flag.Int("qty", internal.DefaultPostsToShow, "")
-	getPopular := flag.Bool("popular", false, "")
-	getUnpopular := flag.Bool("unpopular", false, "")
+	postsToShow := flag.Int("qty", internal.DefaultPostsToShow, "Number of posts to show. Default is 5")
+	getPopular := flag.Bool("popular", true, "Show popular posts")
+	getUnpopular := flag.Bool("unpopular", false, "Show unpopular posts")
 	flag.Parse()
 
-	if *getPopular {
-		posts = internal.SortByPopularity(posts)
-	} else if *getUnpopular {
+	if *getUnpopular {
 		posts = internal.SortByUnpopularity(posts)
+	} else if *getPopular {
+		posts = internal.SortByPopularity(posts)
 	}
 
 	shortenedPosts := internal.ShortenPosts(posts[0:*postsToShow])
