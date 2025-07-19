@@ -11,6 +11,9 @@
 ./binaries/tg-stats-mac --popular --qty=10 # 10 популярных
 ./binaries/tg-stats-mac --unpopular --qty=3 # 3 непопулярных поста
 ./binaries/tg-stats-mac --longest # 5 самых длинных постов
+
 ./binaries/tg-stats-mac --shortest --qty=7 # 7 самых коротких постов
+./binaries/tg-stats-mac --average-word-count # Среднее количество слов в постах
+./binaries/tg-stats-mac --average-word-count --ignore-below=150 # Среднее количество слов в постах, игнорируя короткие посты меньше 150 слов
 ```
 

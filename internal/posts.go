@@ -72,6 +72,23 @@ func SortByUnpopularity(posts []Post) []Post {
 	return posts
 }
 
+func GetAverageWordCount(posts []Post, ignoreBelowCount int) int {
+	var wordCount int
+	var postsCount int
+
+	for _, post := range posts {
+		postWordCount := CountWords(post.Text)
+		if postWordCount < ignoreBelowCount {
+			continue
+		}
+
+		wordCount += CountWords(post.Text)
+		postsCount++
+	}
+
+	return int(wordCount / postsCount)
+}
+
 func SortLongest(posts []Post) []Post {
 	sort.SliceStable(posts, func(i, j int) bool {
 		return CountWords(posts[i].Text) > CountWords(posts[j].Text)
