@@ -2,7 +2,6 @@ package internal
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 )
 
@@ -12,14 +11,14 @@ const (
 )
 
 type Channel struct {
-	Messages []MixedPost
+	Messages []PostJson
 }
 
 func (c Channel) GetPosts() []Post {
 	posts := []Post{}
 
 	for _, post := range c.Messages {
-		if post.Type != typeMessage || post.Text == "" {
+		if (post.Type != typeMessage) || (len(post.TextEntities) == 0) {
 			continue
 		}
 
@@ -43,37 +42,22 @@ func ReadChannelJson() Channel {
 	return channelJsonParsed
 }
 
-type MixedPost struct {
+type PostJson struct {
 	BasePost
-	Text any // string | (string | { text: string })[]
+	TextEntities []Text `json:"text_entities"`
 }
 
-func (m MixedPost) GetText() string {
-	switch text := m.Text.(type) {
-	case string:
-		return text
-	case []any:
-		var combinedText string
+type Text struct {
+	Type string
+	Text string
+}
 
-		for _, textItem := range text {
-			str, ok := textItem.(string)
-			if ok {
-				combinedText += str
-				continue
-			}
+func (p PostJson) GetText() string {
+	var text string
 
-			for key, value := range textItem.(map[string]any) {
-				if key == "text" {
-					combinedText += value.(string)
-				}
-			}
-		}
-
-		return combinedText
+	for _, textItem := range p.TextEntities {
+		text += textItem.Text
 	}
 
-	fmt.Println(separator)
-	fmt.Println(m.Text)
-	ThrowError("couldn't parse text")
-	return ""
+	return text
 }
