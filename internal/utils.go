@@ -34,6 +34,7 @@ func CountWords(s string) int {
 
 		for word := range words {
 			word = strings.TrimSpace(word)
+
 			if len(word) > 0 {
 				counter++
 			}
