@@ -38,6 +38,11 @@ type Reaction struct {
 	Emoji string
 }
 
+type PostsInfo struct {
+	PostCount int
+	WordCount int
+}
+
 func (p *Post) ReactionCount() int {
 	var count int
 
@@ -110,21 +115,32 @@ func SortShortest(posts []Post) []Post {
 	return posts
 }
 
-func GetAverageWordCount(posts []Post, ignoreBelowCount int) int {
-	var wordCount int
-	var postsCount int
+func GetAverageWordCount(posts []Post, minWordCount int) int {
+	info := GetPostsInfo(posts, minWordCount)
+
+	return int(info.WordCount / info.PostCount)
+}
+
+func GetPostCount(posts []Post, minWordCount int) int {
+	info := GetPostsInfo(posts, minWordCount)
+
+	return info.PostCount
+}
+
+func GetPostsInfo(posts []Post, minWordCount int) PostsInfo {
+	info := PostsInfo{}
 
 	for _, post := range posts {
 		postWordCount := post.WordCount()
-		if postWordCount < ignoreBelowCount {
+		if postWordCount < minWordCount {
 			continue
 		}
 
-		wordCount += CountWords(post.Text)
-		postsCount++
+		info.WordCount += postWordCount
+		info.PostCount++
 	}
 
-	return int(wordCount / postsCount)
+	return info
 }
 
 func PrintPosts(posts []Post) {

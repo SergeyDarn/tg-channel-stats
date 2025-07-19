@@ -16,17 +16,27 @@ func main() {
 	getUnpopular := flag.Bool("unpopular", false, "Show unpopular posts")
 	getLongest := flag.Bool("longest", false, "Show longest posts")
 	getShortest := flag.Bool("shortest", false, "Show shortes posts")
-	getAverageWordCount := flag.Bool("average-word-count", false, "Average post word count")
-	ignorePostsBelowCount := flag.Int("ignore-below", 0, "Ignore posts below count (in average calculation)")
+	getPostCount := flag.Bool("post-count", false, "How many posts you posted")
+	getAverageWordCount := flag.Bool("average-word-count", false, "Show average post word count")
+	minWordCount := flag.Int("min-word-count", 0, "Count only posts above certain word count")
 	flag.Parse()
 
-	if !*getPopular && !*getUnpopular && !*getLongest && !*getShortest && !*getAverageWordCount {
+	flagPassed := *getPopular || *getUnpopular || *getLongest || *getShortest ||
+		*getPostCount || *getAverageWordCount
+
+	if !flagPassed {
 		fmt.Println("Please use one of the available stat params")
 		return
 	}
 
+	if *getPostCount {
+		postCount := internal.GetPostCount(posts, *minWordCount)
+		fmt.Println(postCount)
+		return
+	}
+
 	if *getAverageWordCount {
-		wordCount := internal.GetAverageWordCount(posts, *ignorePostsBelowCount)
+		wordCount := internal.GetAverageWordCount(posts, *minWordCount)
 		fmt.Println(wordCount)
 		return
 	}
