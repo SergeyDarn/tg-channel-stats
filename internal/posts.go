@@ -48,16 +48,12 @@ func (p *Post) GetReactionsCount() int {
 	return count
 }
 
-func (p *Post) Shorten() Post {
+func (p *Post) ShortText() string {
 	text := p.Text
 	if len(p.Text) > shortenedMessageLength {
 		text = text[0:shortenedMessageLength]
 	}
-
-	return Post{
-		BasePost: p.BasePost,
-		Text:     text,
-	}
+	return text
 }
 
 func SortByPopularity(posts []Post) []Post {
@@ -76,14 +72,20 @@ func SortByUnpopularity(posts []Post) []Post {
 	return posts
 }
 
-func ShortenPosts(posts []Post) []Post {
-	shortenedPosts := []Post{}
+func SortLongest(posts []Post) []Post {
+	sort.SliceStable(posts, func(i, j int) bool {
+		return CountWords(posts[i].Text) > CountWords(posts[j].Text)
+	})
 
-	for _, post := range posts {
-		shortenedPosts = append(shortenedPosts, post.Shorten())
-	}
+	return posts
+}
 
-	return shortenedPosts
+func SortShortest(posts []Post) []Post {
+	sort.SliceStable(posts, func(i, j int) bool {
+		return CountWords(posts[i].Text) < CountWords(posts[j].Text)
+	})
+
+	return posts
 }
 
 func PrintPosts(posts []Post) {
@@ -94,12 +96,14 @@ func PrintPosts(posts []Post) {
 		fmt.Println(separator)
 		fmt.Printf(PrepareColorOutput("Id: %d", colorPink), post.Id)
 		fmt.Println()
-		fmt.Println(post.Text)
+		fmt.Println(post.ShortText())
 		fmt.Printf(
 			PrepareColorOutput("Reactions: %d %v", colorOrange),
 			post.GetReactionsCount(),
 			post.Reactions,
 		)
+		fmt.Println()
+		fmt.Printf(PrepareColorOutput("Word count: %d", colorLightBlue), CountWords(post.Text))
 		fmt.Println()
 		fmt.Println(separator)
 		fmt.Println()
