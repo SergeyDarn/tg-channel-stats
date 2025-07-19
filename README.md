@@ -5,7 +5,7 @@
 
 # Команды
 ```shell
-./binaris/tg-stats-mac # Вывести 5 популярных постов
+./binaries/tg-stats-mac # Вывести 5 популярных постов
 ./binaries/tg-stats-mac --popular --qty=10 # 10 популярных
 ./binaries/tg-stats-mac --unpopular --qty=3 # 3 непопулярных поста
 ```
