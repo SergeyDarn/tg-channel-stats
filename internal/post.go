@@ -67,7 +67,7 @@ func (p *Post) Print() {
 	fmt.Println()
 	fmt.Println(p.ShortText())
 	fmt.Printf(
-		PrepareColorOutput("Reactions: %d %v", colorOrange),
+		PrepareColorOutput("Reactions (%d): %v", colorOrange),
 		p.ReactionsCount(),
 		p.ReactionsString(),
 	)
