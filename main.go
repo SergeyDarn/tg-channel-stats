@@ -8,50 +8,76 @@ import (
 )
 
 func main() {
-	channel := internal.ReadChannelJson()
-	posts := channel.GetPosts()
+	qty := flag.Int("qty", internal.DefaultPostsToShow, "Number of posts or hashtags to show. Default is 5")
+	getPopularPosts := flag.Bool("popular", false, "Show popular posts")
+	getUnpopularPosts := flag.Bool("unpopular", false, "Show unpopular posts")
+	useSingleReaction := flag.Bool("single-reaction", false, "Calculate posts' popularity by a single top reaction (default is total reactions' count)")
+	getLongestPosts := flag.Bool("longest", false, "Show longest posts")
+	getShortestPosts := flag.Bool("shortest", false, "Show shortest posts")
 
-	postsToShow := flag.Int("qty", internal.DefaultPostsToShow, "Number of posts to show. Default is 5")
-	getPopular := flag.Bool("popular", false, "Show popular posts")
-	getUnpopular := flag.Bool("unpopular", false, "Show unpopular posts")
-	getLongest := flag.Bool("longest", false, "Show longest posts")
-	getShortest := flag.Bool("shortest", false, "Show shortes posts")
+	getHashtags := flag.Bool("hashtags", false, "Show all hashtags")
+	getPopularHashtags := flag.Bool("hashtags-popular", false, "Show all hashtags, sorted by popularity")
+	getUnpopularHashtags := flag.Bool("hashtags-unpopular", false, "Show all hashtags, sorted by unpopularity")
+
 	getPostCount := flag.Bool("post-count", false, "How many posts you posted")
-	getAverageWordCount := flag.Bool("average-word-count", false, "Show average post word count")
+	getAverageWordCount := flag.Bool("average-word-count", false, "Show average word count per post")
 	minWordCount := flag.Int("min-word-count", 0, "Count only posts above certain word count")
 	flag.Parse()
 
-	flagPassed := *getPopular || *getUnpopular || *getLongest || *getShortest ||
-		*getPostCount || *getAverageWordCount
+	flagPassed := *getPopularPosts || *getUnpopularPosts || *getLongestPosts || *getShortestPosts ||
+		*getPostCount || *getAverageWordCount || *getHashtags || *getPopularHashtags || *getUnpopularHashtags
 
 	if !flagPassed {
 		fmt.Println("Please use one of the available stat params")
 		return
 	}
 
+	channel := internal.ReadChannelJson()
+	posts, hashtagMap := channel.ProcessedData()
+	hashtags := hashtagMap.ToSlice()
+
+	if *getHashtags {
+		hashtags.Print()
+		return
+	}
+
+	if *getPopularHashtags {
+		sortedHashtags := hashtags.SortByPopularity(*useSingleReaction)
+		sortedHashtags[0:*qty].PrintWithReactions()
+		return
+	}
+
+	if *getUnpopularHashtags {
+		sortedHashtags := hashtags.SortByUnpopularity(*useSingleReaction)
+		sortedHashtags[0:*qty].PrintWithReactions()
+		return
+	}
+
 	if *getPostCount {
-		postCount := internal.GetPostCount(posts, *minWordCount)
-		fmt.Println(postCount)
+		fmt.Println(
+			posts.Count(*minWordCount),
+		)
 		return
 	}
 
 	if *getAverageWordCount {
-		wordCount := internal.GetAverageWordCount(posts, *minWordCount)
-		fmt.Println(wordCount)
+		fmt.Println(
+			posts.AverageWordCount(*minWordCount),
+		)
 		return
 	}
 
-	if *getPopular {
-		posts = internal.SortByPopularity(posts)
-	} else if *getUnpopular {
-		posts = internal.SortByUnpopularity(posts)
+	if *getPopularPosts {
+		posts = posts.SortByPopularity(*useSingleReaction)
+	} else if *getUnpopularPosts {
+		posts = posts.SortByUnpopularity(*useSingleReaction)
 	}
 
-	if *getLongest {
-		posts = internal.SortLongest(posts)
-	} else if *getShortest {
-		posts = internal.SortShortest(posts)
+	if *getLongestPosts {
+		posts = posts.SortLongest()
+	} else if *getShortestPosts {
+		posts = posts.SortShortest()
 	}
 
-	internal.PrintPosts(posts[0:*postsToShow])
+	posts[0:*qty].Print()
 }
